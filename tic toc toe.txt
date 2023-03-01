@@ -1,0 +1,95 @@
+// @ts-ignore
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-area',
+  template: `
+    <div id="statusArea" className="status">Next player: <span>{{activePlayer}}</span></div>
+    <div id="winnerArea" className="winner" *ngIf="isWinner">Winner: <span>{{activePlayer}}</span></div>
+    <button (click)="resetValues()">Reset</button>
+    <section>
+      <div class="row" *ngFor="let row of rows">
+        <button (click)="changePlayer(row, col)" *ngFor="let col of cols" class="square" style="width:40px;height:40px;">
+          <div [id]="mountIdItem(row, col)"> </div>
+        </button>
+      </div>
+    </section>
+  `,
+  styles: []
+})
+
+export class MainAppComponent implements OnInit {
+  rows: number[] = [0, 1, 2];
+  cols: number[] = [0, 1, 2];
+  activePlayer: string = "X";
+  isWinner = false;
+  winSituationsIds: Array<Array<string>> = [
+    // VERTICAL
+    ['0_0', '0_1', '0_2'],
+    ['1_0', '1_1', '1_2'],
+    ['2_0', '2_1', '2_2'],
+
+    //HORIZONTAL
+    ['0_0', '1_0', '2_0'],
+    ['0_1', '1_1', '2_1'],
+    ['0_2', '1_2', '2_2'],
+
+    // DIAGNONAL
+    ['0_2', '1_1', '2_0'],
+    ['0_0', '1_1', '2_2'],
+  ]
+
+
+
+  ngOnInit() {
+
+  }
+
+  changePlayer(row: number, col: number) {
+    const id = this.mountIdItem(row, col);
+    if (document.getElementById(id).innerText || this.isWinner) return;
+
+    this.setTextInElement(id, this.activePlayer);
+    console.log(this.checkForMatch());
+    if (this.checkForMatch()) {
+      this.isWinner = true;
+    } else {
+      this.activePlayer = this.activePlayer === "X" ? "O" : "X";
+    }
+  }
+
+  resetValues() {
+    this.activePlayer = 'X';
+    this.isWinner = false;
+    for (let indexRow = 0; indexRow < this.rows.length; indexRow++) {
+      for (let indexCol = 0; indexCol < this.cols.length; indexCol++) {
+        this.setTextInElement(this.mountIdItem(this.rows[indexRow], this.cols[indexCol]), '');
+      }
+    }
+  }
+
+  private setTextInElement(id: string, text: string) {
+    document.getElementById(id).innerText = text;
+  }
+
+  mountIdItem(row: number, col: number): string {
+    return `${row}_${col}`;
+  }
+
+
+  checkForMatch(): boolean {
+    for (let indexWin = 0; indexWin < this.winSituationsIds.length; indexWin++) {
+      let firstSquare = this.winSituationsIds[indexWin][0];
+      let secondSquare = this.winSituationsIds[indexWin][1];
+      let thirdSquare = this.winSituationsIds[indexWin][2];
+
+      if (document.getElementById(firstSquare).innerText == this.activePlayer
+        && document.getElementById(secondSquare).innerText == this.activePlayer
+        && document.getElementById(thirdSquare).innerText == this.activePlayer) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+}
